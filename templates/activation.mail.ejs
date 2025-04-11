@@ -1,14 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RTS Academy Activation Email</title>
-</head>
-<body>
-    <div>
-        <h1>Hello <%= user.name %>,</h1>
-        <h2><%= activationCode %></h2>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Activation Email</title>
+  </head>
+  <body>
+    <div
+      style="
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        max-width: 600px;
+        margin: 20px auto;
+      "
+    >
+      <h1 style="color: #333">Welcome, <%= user.name %>!</h1>
+      <p style="font-size: 16px; color: #555">
+        Thank you for signing up. Please use the activation code below to
+        activate your account:
+      </p>
+      <div
+        style="
+          margin: 20px 0;
+          padding: 10px;
+          background-color: #f0f8ff;
+          border: 1px solid #007bff;
+          border-radius: 5px;
+          display: inline-block;
+        "
+      >
+        <h2 style="color: #007bff; margin: 0"><%= activationCode %></h2>
+      </div>
+      <p style="font-size: 14px; color: #777">
+        If you did not request this email, please ignore it.
+      </p>
+      <p style="font-size: 14px; color: #777">
+        Need help? Contact our support team.
+      </p>
     </div>
-</body>
+  </body>
 </html>

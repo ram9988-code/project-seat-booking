@@ -9,7 +9,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 First, clone the repository and install dependencies:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/ram9988-code/project-seat-booking
 cd freelance
 npm install
 ```
