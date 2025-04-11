@@ -83,6 +83,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
      ```
 
 4. **GET `/api/verify-email`**
+
    - **Description**: Verifies the user's email using an activation token.
    - **Query Parameters**:
      - `token`: The activation token.
@@ -91,6 +92,57 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
      {
        "success": true,
        "message": "Email verified successfully"
+     }
+     ```
+
+5. **POST `/api/refresh-token`**
+
+   - **Description**: Refreshes the access token using a valid refresh token.
+   - **Request Body**:
+     ```json
+     {
+       "refreshToken": "string"
+     }
+     ```
+   - **Response**:
+     ```json
+     {
+       "success": true,
+       "accessToken": "string"
+     }
+     ```
+
+6. **POST `/api/forgot-password`**
+
+   - **Description**: Sends a password reset link to the user's email.
+   - **Request Body**:
+     ```json
+     {
+       "email": "string"
+     }
+     ```
+   - **Response**:
+     ```json
+     {
+       "success": true,
+       "message": "Password reset link sent"
+     }
+     ```
+
+7. **POST `/api/reset-password`**
+   - **Description**: Resets the user's password using a reset token.
+   - **Request Body**:
+     ```json
+     {
+       "token": "string",
+       "newPassword": "string"
+     }
+     ```
+   - **Response**:
+     ```json
+     {
+       "success": true,
+       "message": "Password reset successfully"
      }
      ```
 
@@ -117,6 +169,16 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 - **Description**: A page that verifies the user's email using the activation token.
 - **Features**: Displays a success or error message based on the verification status.
+
+### **Forgot Password Page (`/forgot-password`)**
+
+- **Description**: A page where users can request a password reset link.
+- **Features**: Includes a form for entering the user's email.
+
+### **Reset Password Page (`/reset-password`)**
+
+- **Description**: A page where users can reset their password using a reset token.
+- **Features**: Includes a form for entering the new password.
 
 ---
 

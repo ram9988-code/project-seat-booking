@@ -4,11 +4,13 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
+import { Button } from "./ui/button";
 
 export default function SeatGrid() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [bookedSeats, setBookedSeats] = useState<number[]>([]);
-  // const [selectedSeats, setSelectedSeats] = useState<number[]>([]);
+  const [mybookedSeats, setMyBookedSeats] = useState<number[]>([]);
   const [seatsToBook, setSeatsToBook] = useState<number>(0);
 
   const totalSeats = 80;
@@ -17,32 +19,40 @@ export default function SeatGrid() {
   // ✅ Load booked seats on mount
   useEffect(() => {
     const fetchBookedSeats = async () => {
-      const response = await axios.get("/api/refresh");
+      setIsLoading(true);
+      await axios
+        .get("/api/refresh")
+        .then(async (res) => {
+          if (res.status === 200) {
+            toast.success("logged in successfully");
+            const res = await fetch("/api/book-seats");
+            const data = await res.json();
 
-      if (response.status === 200) {
-        toast.success("logged in successfully");
-        const res = await fetch("/api/book-seats");
-        const data = await res.json();
-
-        if (data) {
-          const seatNumbers = data.map(
-            (seat: { seatNumber: number }) => seat.seatNumber
-          );
-          setBookedSeats(seatNumbers);
-        }
-      }
-      if (response.status === 401) {
-        toast.error("Please login to this resource");
-        router.replace("/login");
-      }
-      if (response.status === 400) {
-        toast.error("Access token is not valid");
-        router.replace("/login");
-      }
-      if (response.status === 500) {
-        toast.error("Please login to access this resource");
-        router.replace("/login");
-      }
+            if (data) {
+              const seatNumbers = data.map(
+                (seat: { seatNumber: number }) => seat.seatNumber
+              );
+              setBookedSeats(seatNumbers);
+            }
+          }
+          const resMyBooking = await fetch("/api/my-booking");
+          const dataMyBooking = await resMyBooking.json();
+          if (dataMyBooking) {
+            const seatNumbers = dataMyBooking.map(
+              (seat: { seatNumber: number }) => seat.seatNumber
+            );
+            setMyBookedSeats(seatNumbers);
+          }
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          if (axios.isAxiosError(error)) {
+            toast.error("Login to proceed further.");
+            router.replace("/login");
+            // setIsLoading(false);
+          }
+          toast.error("Failed to fetch booked seats.", error);
+        });
     };
     fetchBookedSeats();
   }, []);
@@ -97,6 +107,7 @@ export default function SeatGrid() {
             }
           });
         setBookedSeats([...bookedSeats, ...newSelected]);
+        setMyBookedSeats([...mybookedSeats, ...newSelected]);
       } catch (error) {
         console.error("Booking failed:", error);
       }
@@ -105,9 +116,32 @@ export default function SeatGrid() {
     }
   };
 
+  const handleResetBooking = async () => {
+    try {
+      await axios.delete("/api/my-booking", {
+        data: { seats: mybookedSeats },
+      });
+      setMyBookedSeats([]);
+      setBookedSeats((prev) =>
+        prev.filter((seat) => !mybookedSeats.includes(seat))
+      );
+      toast.success("Booking reset successfully!");
+    } catch (error) {
+      console.error("Reset booking failed:", error);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-2xl font-bold">Loading...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 flex w-full h-fit flex-row items-center justify-between ">
-      <div className="w-1/2">
+    <div className="p-4 flex w-full h-fit md:flex-row flex-col items-center justify-between ">
+      <div className="md:w-1/2 w-full">
         <div className=" p-6 grid grid-cols-7 gap-2 select-none bg-white rounded-2xl ">
           {Array.from({ length: totalSeats }, (_, i) => i + 1).map((seat) => {
             const isBooked = bookedSeats.includes(seat);
@@ -136,8 +170,31 @@ export default function SeatGrid() {
           </div>
         </div>
       </div>
-      <div className="w-1/2">
-        <div className="flex gap-2 flex-row items-center justify-end">
+      <div className="md:w-1/2 w-full">
+        <div className="flex gap-2 flex-col items-center justify-end mb-4">
+          <div className="flex justify-end items-end">
+            <p className="text-[16px] font-medium">My Booked Seats:</p>
+          </div>
+          {mybookedSeats.length > 0 ? (
+            <div className="grid grid-cols-7 gap-2 justify-center items-center">
+              {mybookedSeats.map((seat) => (
+                <div
+                  key={seat}
+                  className="flex justify-center items-center rounded-[8px] bg-yellow-400 px-5 py-1"
+                >
+                  <p className="text-[16px] font-medium">{seat}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex justify-center items-center">
+              <p className="text-[16px] font-medium text-gray-500">
+                No Seats Booked
+              </p>
+            </div>
+          )}
+        </div>
+        <div className="flex gap-2 flex-row items-center justify-center">
           <input
             type="number"
             min="1"
@@ -154,10 +211,14 @@ export default function SeatGrid() {
             Book
           </button>
         </div>
-        <div className="flex gap-2 flex-row items-center justify-end mt-4">
-          <button className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-200 w-1/2">
+        <div className="flex gap-2 flex-row items-center justify-center mt-4">
+          <Button
+            variant={"destructive"}
+            disabled={mybookedSeats.length === 0}
+            onClick={handleResetBooking}
+          >
             Reset Booking
-          </button>
+          </Button>
         </div>
       </div>
       <Toaster position="top-right" />
